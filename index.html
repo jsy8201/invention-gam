@@ -1,0 +1,925 @@
+GitHub Pages 등에 `index.html` 파일로 바로 복사해 올릴 수 있는 전체 코드입니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>발명 사고 기법 챌린지! | 초6 실과</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f0f7ff 0%, #fef9ec 100%);
+      min-height: 100vh;
+    }
+    .card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.08), 0 4px 10px -2px rgba(30, 58, 138, 0.04);
+    }
+    .bounce-in {
+      animation: bounceIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .roulette-spin {
+      animation: pulseSpin 0.15s ease-in-out infinite alternate;
+    }
+    @keyframes pulseSpin {
+      from { transform: translateY(-2px) scale(0.99); }
+      to { transform: translateY(2px) scale(1.01); }
+    }
+    .tab-active {
+      background-color: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-blue-200">
+  <!-- 상단 헤더 -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-sm">
+          💡
+        </div>
+        <div>
+          <div class="text-xs font-bold text-blue-600 tracking-wide">초6 실과 · 4. 발명과 지식 재산권</div>
+          <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">발명 사고 기법 챌린지</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold">
+          <span>⭐ 점수</span>
+          <span id="total-score" class="text-amber-600 font-black">0</span>
+        </div>
+        <button id="sound-toggle" type="button" class="px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700 transition flex items-center gap-1" title="효과음 켜기/끄기">
+          <span id="sound-icon">🔊</span>
+          <span class="hidden sm:inline" id="sound-label">소리 켜짐</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 네비게이션 탭 -->
+    <nav class="max-w-5xl mx-auto px-4 pb-3 flex gap-1.5 overflow-x-auto">
+      <button data-tab="learn" class="nav-tab tab-active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition">
+        📚 6가지 기법 도감
+      </button>
+      <button data-tab="quiz" class="nav-tab bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition">
+        🎯 활동1: 기법 퀴즈 배틀
+      </button>
+      <button data-tab="roulette" class="nav-tab bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition">
+        ✊ 활동2: 가위바위보 발명
+      </button>
+      <button data-tab="board" class="nav-tab bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition">
+        👑 활동3: 우리 반 발명왕 <span id="idea-count-badge" class="ml-1 px-1.5 py-0.5 text-[11px] rounded-full bg-blue-100 text-blue-700">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- 메인 컨테이너 -->
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <!-- 토스트 알림 -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow-lg transition"></div>
+
+    <!-- 1. 기법 도감 섹션 -->
+    <section id="tab-learn" class="tab-panel space-y-5">
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="inline-block px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold mb-1.5">학습 목표</span>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">다양한 발명 사고 기법을 이해하고, 발명 아이디어를 떠올려 보자!</h2>
+          <p class="text-sm text-slate-600 mt-1">카드를 눌러 각 기법의 뜻과 대표 발명품 예시를 확인한 뒤, 퀴즈와 게임에 도전하세요.</p>
+        </div>
+        <button type="button" id="go-quiz-btn" class="shrink-0 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition">
+          퀴즈 풀러 가기 →
+        </button>
+      </div>
+
+      <div id="techniques-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- 2. 활동1: 퀴즈 배틀 섹션 -->
+    <section id="tab-quiz" class="tab-panel hidden space-y-5">
+      <div class="bg-white rounded-2xl p-5 sm:p-7 card-shadow border border-slate-100">
+        <!-- 퀴즈 상단 상태바 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-extrabold" id="quiz-progress">문제 1 / 13</span>
+            <span class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-extrabold" id="quiz-combo">🔥 0 연속 정답</span>
+          </div>
+          <button id="quiz-restart-btn" type="button" class="text-xs font-bold text-slate-500 hover:text-slate-800 underline">
+            처음부터 다시 풀기
+          </button>
+        </div>
+
+        <!-- 진행 바 -->
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mt-4">
+          <div id="quiz-bar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300" style="width: 8%;"></div>
+        </div>
+
+        <!-- 퀴즈 본문 -->
+        <div id="quiz-body" class="mt-6">
+          <p class="text-sm font-bold text-slate-500 text-center mb-2">아래의 변화는 어떤 발명 사고 기법과 관련이 있을까요?</p>
+          <div id="quiz-question-box" class="bg-gradient-to-br from-slate-50 to-blue-50/60 border-2 border-blue-100 rounded-2xl p-6 text-center my-4">
+            <div id="quiz-emoji" class="text-4xl mb-2">📱</div>
+            <div id="quiz-prompt" class="text-xl sm:text-2xl font-black text-slate-900 break-keep"></div>
+          </div>
+
+          <!-- 6개 기법 선택 버튼 -->
+          <div id="quiz-options" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5"></div>
+
+          <!-- 정답 해설 박스 -->
+          <div id="quiz-feedback" class="hidden mt-5 rounded-2xl p-4 border text-sm bounce-in">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div id="quiz-feedback-title" class="font-extrabold text-base mb-1"></div>
+                <p id="quiz-feedback-desc" class="text-slate-700 leading-relaxed"></p>
+              </div>
+              <button id="quiz-next-btn" type="button" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition">
+                다음 문제 →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 퀴즈 결과 화면 -->
+        <div id="quiz-result" class="hidden py-8 text-center space-y-4 bounce-in">
+          <div class="text-5xl">🏆</div>
+          <h3 class="text-2xl font-black text-slate-900">퀴즈 배틀 완료!</h3>
+          <p class="text-slate-600 text-sm sm:text-base">
+            총 <span id="quiz-final-total" class="font-bold">13</span>문제 중
+            <span id="quiz-final-correct" class="font-black text-blue-600 text-lg">0</span>문제를 맞혔어요!
+            (최고 연속 정답: <span id="quiz-final-maxcombo" class="font-bold text-orange-600">0</span>연속)
+          </p>
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
+            <button id="quiz-retry-btn" type="button" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm transition">
+              다시 도전하기
+            </button>
+            <button id="quiz-to-activity2-btn" type="button" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition">
+              활동2: 발명 룰렛 하러 가기 →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 활동2: 가위바위보 & 발명 룰렛 섹션 -->
+    <section id="tab-roulette" class="tab-panel hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- 왼쪽: 가위바위보 + 쪽지 뽑기 -->
+        <div class="lg:col-span-6 bg-white rounded-2xl p-5 sm:p-6 card-shadow border border-slate-100 space-y-5">
+          <div>
+            <span class="inline-block px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold mb-1">Step 1</span>
+            <h3 class="text-lg font-extrabold text-slate-900">가위·바위·보로 물건 & 기법 뽑기!</h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">AI 친구와 가위바위보를 하거나, 바로 뽑기 버튼을 눌러 미션을 받으세요.</p>
+          </div>
+
+          <!-- 가위바위보 대결 영역 -->
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80">
+            <div class="flex items-center justify-around text-center py-2">
+              <div>
+                <div class="text-xs font-bold text-slate-500 mb-1">나</div>
+                <div id="rps-player" class="text-4xl sm:text-5xl">❔</div>
+              </div>
+              <div class="text-sm font-black text-slate-400">VS</div>
+              <div>
+                <div class="text-xs font-bold text-slate-500 mb-1">발명 짝꿍 AI</div>
+                <div id="rps-ai" class="text-4xl sm:text-5xl">🤖</div>
+              </div>
+            </div>
+            <div id="rps-status" class="text-center text-xs sm:text-sm font-bold text-blue-700 min-h-[20px] mt-1">
+              가위, 바위, 보 중 하나를 선택해 보세요!
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5 mt-3">
+              <button type="button" data-rps="가위" class="rps-btn py-2.5 rounded-xl bg-white hover:bg-blue-50 border border-slate-200 font-bold text-sm shadow-sm transition active:scale-95">
+                ✌️ 가위
+              </button>
+              <button type="button" data-rps="바위" class="rps-btn py-2.5 rounded-xl bg-white hover:bg-blue-50 border border-slate-200 font-bold text-sm shadow-sm transition active:scale-95">
+                ✊ 바위
+              </button>
+              <button type="button" data-rps="보" class="rps-btn py-2.5 rounded-xl bg-white hover:bg-blue-50 border border-slate-200 font-bold text-sm shadow-sm transition active:scale-95">
+                🖐️ 보
+              </button>
+            </div>
+          </div>
+
+          <!-- 뽑힌 물건 & 기법 룰렛 결과 -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-2xl bg-amber-50 border-2 border-amber-200 p-4 text-center">
+              <div class="text-xs font-bold text-amber-700 mb-1">뽑힌 물건 쪽지</div>
+              <div id="slot-item-emoji" class="text-3xl mb-1">👟</div>
+              <div id="slot-item-name" class="text-base sm:text-lg font-black text-slate-900">실내화</div>
+            </div>
+            <div class="rounded-2xl bg-blue-50 border-2 border-blue-200 p-4 text-center">
+              <div class="text-xs font-bold text-blue-700 mb-1">화면 속 발명 기법</div>
+              <div id="slot-tech-emoji" class="text-3xl mb-1">➕</div>
+              <div id="slot-tech-name" class="text-base sm:text-lg font-black text-slate-900">더하기 기법</div>
+            </div>
+          </div>
+
+          <button id="spin-direct-btn" type="button" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition">
+            🎲 물건 + 기법 바로 다시 뽑기
+          </button>
+        </div>
+
+        <!-- 오른쪽: 발명 아이디어 작성 폼 -->
+        <div class="lg:col-span-6 bg-white rounded-2xl p-5 sm:p-6 card-shadow border border-slate-100 flex flex-col justify-between space-y-4">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="inline-block px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold mb-1">Step 2</span>
+                <h3 class="text-lg font-extrabold text-slate-900">나만의 발명품 등록하기</h3>
+              </div>
+              <button id="hint-btn" type="button" class="px-3 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold transition">
+                💡 예시 힌트 보기
+              </button>
+            </div>
+
+            <div id="hint-box" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs sm:text-sm text-amber-900"></div>
+
+            <form id="idea-form" class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">발명가 이름 (모둠명/별명 가능)</label>
+                <input id="inventor-name" type="text" maxlength="20" placeholder="예: 6학년 김발명" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">발명품 이름</label>
+                <input id="invention-title" type="text" maxlength="40" placeholder="예: 조명이 달린 실내화" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">어떤 불편함을 해결했나요? (설명)</label>
+                <textarea id="invention-desc" rows="3" maxlength="160" placeholder="예: 어두운 복도나 밤에도 바닥을 잘 볼 수 있어서 안전해요!" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none" required></textarea>
+              </div>
+
+              <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md transition">
+                ✨ 발명 도감에 등록하기 (+30점)
+              </button>
+            </form>
+          </div>
+
+          <div class="text-xs text-slate-500 bg-slate-50 rounded-xl p-3 border border-slate-100">
+            📌 등록한 발명품은 <strong>[활동3: 우리 반 발명왕]</strong> 탭에 모여 친구들과 투표하고 1분 발표를 할 수 있어요!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 활동3: 우리 반 발명왕 (발표 & 투표 보드) -->
+    <section id="tab-board" class="tab-panel hidden space-y-5">
+      <!-- 상단 발표 타이머 & 필터 바 -->
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">👑 우리 반 발명왕 아이디어 보드</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-0.5">가장 기발한 발명 아이디어에 하트(투표)를 눌러 주세요! 1분 발표 타이머도 쓸 수 있어요.</p>
+        </div>
+
+        <!-- 1분 발표 타이머 -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2">
+          <span class="text-xs font-bold text-slate-600">⏱️ 1분 발표</span>
+          <span id="timer-display" class="font-mono text-lg font-black text-blue-600 w-14 text-center">01:00</span>
+          <button id="timer-toggle-btn" type="button" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">시작</button>
+          <button id="timer-reset-btn" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition">초기화</button>
+        </div>
+      </div>
+
+      <!-- 필터 및 정렬 -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-1.5" id="board-filters">
+          <button data-filter="전체" class="filter-chip px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">전체</button>
+          <button data-filter="더하기 기법" class="filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold">➕ 더하기</button>
+          <button data-filter="빼기 기법" class="filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold">➖ 빼기</button>
+          <button data-filter="모양 바꾸기 기법" class="filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold">🔄 모양 바꾸기</button>
+          <button data-filter="크기 바꾸기 기법" class="filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold">🔍 크기 바꾸기</button>
+          <button data-filter="용도 바꾸기 기법" class="filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold">💡 용도 바꾸기</button>
+          <button data-filter="반대로 하기 기법" class="filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold">🙃 반대로 하기</button>
+        </div>
+
+        <button id="clear-ideas-btn" type="button" class="text-xs font-bold text-rose-500 hover:text-rose-700 underline">
+          내 보드 비우기
+        </button>
+      </div>
+
+      <!-- 발명 카드 목록 -->
+      <div id="ideas-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+  </main>
+
+  <script>
+    // ====== 1. 데이터 정의 (초6 실과 PPT 기반) ======
+    const TECHNIQUES = [
+      {
+        id: 'add',
+        name: '더하기 기법',
+        emoji: '➕',
+        color: 'from-blue-500 to-cyan-500',
+        badge: 'bg-blue-100 text-blue-800',
+        desc: '기존의 물건에 다른 물건이나 다른 기능을 더하는 기법이에요.',
+        examples: ['연필 + 지우개', '전화기 + 카메라 + 컴퓨터 → 스마트폰', '숟가락 + 포크 → 포크 달린 숟가락']
+      },
+      {
+        id: 'sub',
+        name: '빼기 기법',
+        emoji: '➖',
+        color: 'from-rose-500 to-pink-500',
+        badge: 'bg-rose-100 text-rose-800',
+        desc: '물건의 구성이나 기능 가운데 불필요한 일부를 제거하는 기법이에요.',
+        examples: ['선풍기 - 날개 → 날개 없는 선풍기', '이어폰 - 선 → 무선 이어폰', '수박 - 씨 → 씨 없는 수박']
+      },
+      {
+        id: 'shape',
+        name: '모양 바꾸기 기법',
+        emoji: '🔄',
+        color: 'from-amber-500 to-orange-500',
+        badge: 'bg-amber-100 text-amber-800',
+        desc: '물건의 모양을 바꾸어 사용하기 더 편리하게 만드는 기법이에요.',
+        examples: ['일자 빨대 → 구부러지는 빨대', '원통형 병 → 허리가 오목한 음료수병', '화장지 → 올록볼록 엠보싱 화장지']
+      },
+      {
+        id: 'size',
+        name: '크기 바꾸기 기법',
+        emoji: '🔍',
+        color: 'from-emerald-500 to-teal-500',
+        badge: 'bg-emerald-100 text-emerald-800',
+        desc: '큰 물건을 작게 만들거나 작은 물건을 크게 만드는 기법이에요.',
+        examples: ['큰 우산 → 가방에 들어가는 접이식 우산', '대용량 가습기 → 미니 가습기', '스탠드형 선풍기 → 휴대용 선풍기']
+      },
+      {
+        id: 'use',
+        name: '용도 바꾸기 기법',
+        emoji: '💡',
+        color: 'from-violet-500 to-purple-500',
+        badge: 'bg-violet-100 text-violet-800',
+        desc: '물건의 원래 용도를 다른 용도로 바꾸어 새롭게 만드는 기법이에요.',
+        examples: ['공간 온도계 → 체온계', '풍차 → 풍력 발전기', '선풍기 → 환풍기 / 장갑 → 발가락 양말']
+      },
+      {
+        id: 'reverse',
+        name: '반대로 하기 기법',
+        emoji: '🙃',
+        color: 'from-fuchsia-500 to-indigo-500',
+        badge: 'bg-fuchsia-100 text-fuchsia-800',
+        desc: '물건의 모양, 크기, 방향, 성질 등을 반대로 적용하는 기법이에요.',
+        examples: ['화장품 용기를 거꾸로 세우는 튜브', '김이 밖이 아닌 밥이 바깥쪽에 있는 누드김밥']
+      }
+    ];
+
+    const QUIZ_QUESTIONS = [
+      { emoji: '📱', prompt: '전화기 + 카메라 + 컴퓨터 → 스마트폰', answer: '더하기 기법', reason: '전화기에 카메라와 컴퓨터 기능을 더해 하나의 스마트폰으로 만들었어요!' },
+      { emoji: '💨', prompt: '대용량 가습기 → 미니 가습기', answer: '크기 바꾸기 기법', reason: '커다란 가습기를 책상 위에 올려둘 수 있게 작은 크기로 바꿨어요!' },
+      { emoji: '🌬️', prompt: '풍차 → 풍력 발전기', answer: '용도 바꾸기 기법', reason: '곡식을 빻거나 물을 퍼 올리던 풍차를 전기를 만드는 용도로 바꿨어요!' },
+      { emoji: '🚲', prompt: '자전거 + 자전거 → 다인승 자전거', answer: '더하기 기법', reason: '자전거에 또 다른 자전거를 연결해 여러 명이 함께 탈 수 있게 더했어요!' },
+      { emoji: '🎧', prompt: '이어폰 - 선 → 무선 이어폰', answer: '빼기 기법', reason: '걸리적거리던 이어폰의 선을 과감하게 빼서 편리하게 만들었어요!' },
+      { emoji: '🍉', prompt: '수박 - 씨 → 씨 없는 수박', answer: '빼기 기법', reason: '먹기 불편한 수박의 씨를 없애서 한입에 먹기 좋게 만들었어요!' },
+      { emoji: '🥤', prompt: '원통형 음료수병 → 허리가 오목한 음료수병', answer: '모양 바꾸기 기법', reason: '손으로 쥐기 편하도록 병의 가운데 모양을 오목하게 바꿨어요!' },
+      { emoji: '🍙', prompt: '일반 김밥 → 밥이 김의 바깥쪽에 있는 김밥', answer: '반대로 하기 기법', reason: '김과 밥의 안팎 위치를 반대로 바꾸어 새로운 누드김밥을 만들었어요!' },
+      { emoji: '🥄', prompt: '숟가락 + 포크 → 포크 달린 숟가락', answer: '더하기 기법', reason: '숟가락과 포크 두 가지 물건을 하나로 더해 캠핑이나 급식에서 편하게 써요!' },
+      { emoji: '🧻', prompt: '화장지 → 올록볼록 화장지 (엠보싱 화장지)', answer: '모양 바꾸기 기법', reason: '평평한 화장지 표면을 올록볼록하게 모양을 바꿔 흡수력과 촉감을 높였어요!' },
+      { emoji: '🌀', prompt: '선풍기 → 환풍기', answer: '용도 바꾸기 기법', reason: '바람을 쐬어 시원하게 하는 선풍기를 실내 공기를 빼내는 환풍기 용도로 바꿨어요!' },
+      { emoji: '🧦', prompt: '장갑 → 발가락 양말', answer: '용도 바꾸기 기법', reason: '손에 끼우던 장갑의 구조를 발에 신는 양말 용도로 바꾸어 적용했어요!' },
+      { emoji: '🎐', prompt: '스탠드형 선풍기 → 휴대용 선풍기', answer: '크기 바꾸기 기법', reason: '집에 세워두는 큰 선풍기를 손에 들고 다닐 수 있는 작은 크기로 바꿨어요!' }
+    ];
+
+    const CLASSROOM_ITEMS = [
+      { emoji: '👟', name: '실내화', hints: { '더하기 기법': '어두운 밤에도 앞을 비추는 LED 조명이 달린 실내화', '빼기 기법': '뒤꿈치를 없애 슬리퍼처럼 쏙 신는 실내화', '모양 바꾸기 기법': '발 모양에 맞춰 구부러지는 접이식 실내화', '크기 바꾸기 기법': '주머니에 쏙 들어가는 초소형 여행용 실내화', '용도 바꾸기 기법': '걸을 때마다 바닥을 닦아주는 청소용 실내화', '반대로 하기 기법': '앞뒤 구분 없이 어느 방향으로 신어도 똑같은 실내화' } },
+      { emoji: '☂️', name: '우산', hints: { '더하기 기법': '손전등과 선풍기가 손잡이에 달린 우산', '빼기 기법': '우산살을 없애고 공기를 불어넣어 펴는 우산', '모양 바꾸기 기법': '바람에 뒤집히지 않는 물방울 모양 우산', '크기 바꾸기 기법': '한 손에 들어오는 미니 캡슐 우산', '용도 바꾸기 기법': '뒤집어서 빗물을 모으는 빗물 저금통 우산', '반대로 하기 기법': '접을 때 젖은 면이 안쪽으로 말려 들어가는 거꾸로 우산' } },
+      { emoji: '🎒', name: '책가방', hints: { '더하기 기법': '바퀴와 손잡이를 더해 끌고 다닐 수 있는 책가방', '빼기 기법': '지퍼를 없애고 자석으로 1초 만에 여닫는 가방', '모양 바꾸기 기법': '등에 딱 붙어 무게를 분산하는 거북이 등딱지 모양 가방', '크기 바꾸기 기법': '준비물이 많을 때만 지퍼를 열어 커지는 확장형 가방', '용도 바꾸기 기법': '펼치면 캠핑용 돗자리가 되는 책가방', '반대로 하기 기법': '앞으로 메고 다니며 바로 물건을 꺼내는 앞가방' } },
+      { emoji: '✏️', name: '연필', hints: { '더하기 기법': '뒤에 지우개와 미니 자가 함께 달린 연필', '빼기 기법': '나무 껍질을 없애고 통째로 흑연으로 만든 깎지 않는 연필', '모양 바꾸기 기법': '굴러떨어지지 않는 삼각형·육각형 연필', '크기 바꾸기 기법': '다 써서 짧아져도 연결해 길게 쓰는 조립식 연필', '용도 바꾸기 기법': '다 쓴 뒤 화분에 꽂으면 새싹이 자라는 씨앗 연필', '반대로 하기 기법': '양쪽 끝을 모두 깎아 두 가지 색으로 쓰는 양면 연필' } },
+      { emoji: '🥤', name: '물병', hints: { '더하기 기법': '물 마실 시간을 알려주는 타이머가 달린 물병', '빼기 기법': '뚜껑을 없애고 누르면 바로 나오는 빨대 밸브 물병', '모양 바꾸기 기법': '가방 옆주머니에 딱 맞게 납작해진 책 모양 물병', '크기 바꾸기 기법': '다 마시면 실리콘처럼 작게 접히는 물병', '용도 바꾸기 기법': '무게를 재서 아령으로도 쓰는 운동용 물병', '반대로 하기 기법': '위아래 양쪽으로 다 열려서 세척이 쉬운 물병' } },
+      { emoji: '🪑', name: '교실 의자', hints: { '더하기 기법': '등받이에 가방 걸이와 작은 바구니가 달린 의자', '빼기 기법': '다리를 없애고 천장에 매달거나 바닥에 붙이는 의자', '모양 바꾸기 기법': '허리를 펴주는 S자 곡선 모양 의자', '크기 바꾸기 기법': '키에 맞춰 높낮이가 자유롭게 커지고 작아지는 의자', '용도 바꾸기 기법': '뒤집으면 작은 책상으로 변신하는 의자', '반대로 하기 기법': '앞으로 기대어 앉는 무릎 보호 자세 교정 의자' } },
+      { emoji: '🪥', name: '칫솔', hints: { '더하기 기법': '손잡이 안에 치약이 들어있어 누르면 나오는 칫솔', '빼기 기법': '플라스틱 손잡이를 없애고 손가락에 끼우는 골무 칫솔', '모양 바꾸기 기법': '어금니 안쪽까지 닿도록 목이 구부러진 칫솔', '크기 바꾸기 기법': '양치 후 손잡이 속으로 쏙 들어가는 휴대용 미니 칫솔', '용도 바꾸기 기법': '다 쓴 칫솔을 끼워 운동화 세척 솔로 쓰는 변신 캡', '반대로 하기 기법': '위아래 이빨을 동시에 닦아주는 양면 칫솔' } },
+      { emoji: '👓', name: '안경', hints: { '더하기 기법': '어두운 곳에서 불이 켜지는 미니 라이트 안경', '빼기 기법': '안경다리를 없애고 콧등에만 살짝 끼우는 안경', '모양 바꾸기 기법': '충격에도 부러지지 않고 동그랗게 말리는 고무 안경', '크기 바꾸기 기법': '돋보기처럼 글씨만 크게 확대해 주는 부분 렌즈 안경', '용도 바꾸기 기법': '햇빛이 강하면 선글라스로 변하는 변색 안경', '반대로 하기 기법': '거꾸로 써서 누워서도 편하게 책을 보는 프리즘 안경' } }
+    ];
+
+    const SAMPLE_IDEAS = [
+      { id: 'sample-1', inventor: '그네쌤 예시', item: '실내화', tech: '더하기 기법', title: '조명이 달린 실내화', desc: '어두운 밤이나 정전되었을 때 발밑을 환하게 비춰주어 안전하게 걸을 수 있어요.', votes: 5, voted: false },
+      { id: 'sample-2', inventor: '6학년 지민', item: '우산', tech: '반대로 하기 기법', title: '거꾸로 접히는 우산', desc: '우산을 접을 때 빗물이 묻은 바깥 면이 안쪽으로 말려 들어가서 교실 바닥이나 옷이 젖지 않아요.', votes: 4, voted: false },
+      { id: 'sample-3', inventor: '6학년 민준', item: '물병', tech: '크기 바꾸기 기법', title: '다 마시면 접히는 납작 물병', desc: '물을 다 마신 뒤에는 종이처럼 얇게 접어서 필통이나 가방 앞주머니에 쏙 넣을 수 있어요.', votes: 3, voted: false }
+    ];
+
+    // ====== 2. 상태 관리 ======
+    const state = {
+      activeTab: 'learn',
+      score: 0,
+      soundOn: true,
+      quiz: {
+        index: 0,
+        correct: 0,
+        combo: 0,
+        maxCombo: 0,
+        answered: false
+      },
+      roulette: {
+        item: CLASSROOM_ITEMS[0],
+        tech: TECHNIQUES[0]
+      },
+      ideas: [...SAMPLE_IDEAS],
+      boardFilter: '전체',
+      timer: {
+        seconds: 60,
+        running: false,
+        intervalId: null
+      }
+    };
+
+    try {
+      const savedIdeas = localStorage.getItem('inv_game_ideas_v1');
+      if (savedIdeas) {
+        const parsed = JSON.parse(savedIdeas);
+        if (Array.isArray(parsed) && parsed.length > 0) state.ideas = parsed;
+      }
+      const savedScore = localStorage.getItem('inv_game_score_v1');
+      if (savedScore) state.score = Number(savedScore) || 0;
+    } catch (e) {}
+
+    function saveState() {
+      try {
+        localStorage.setItem('inv_game_ideas_v1', JSON.stringify(state.ideas));
+        localStorage.setItem('inv_game_score_v1', String(state.score));
+      } catch (e) {}
+    }
+
+    // ====== 3. Web Audio API 효과음 ======
+    let audioCtx = null;
+    function playTone(type) {
+      if (!state.soundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+          osc.start(now);
+          osc.stop(now + 0.39);
+        } else if (type === 'wrong') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.setValueAtTime(180, now + 0.12);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.31);
+        } else if (type === 'pop') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(900, now + 0.07);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'alarm') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.setValueAtTime(660, now + 0.15);
+          osc.frequency.setValueAtTime(880, now + 0.3);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+          osc.start(now);
+          osc.stop(now + 0.56);
+        }
+      } catch (e) {}
+    }
+
+    // ====== 4. 공통 UI 헬퍼 ======
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(toast._tid);
+      toast._tid = setTimeout(() => toast.classList.add('hidden'), 2300);
+    }
+
+    function addScore(pts) {
+      state.score += pts;
+      document.getElementById('total-score').textContent = state.score;
+      saveState();
+    }
+
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('tab-active');
+          btn.classList.remove('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+        } else {
+          btn.classList.remove('tab-active');
+          btn.classList.add('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+        }
+      });
+      playTone('pop');
+    }
+
+    // ====== 5. 기법 도감 렌더링 ======
+    function renderTechniques() {
+      const grid = document.getElementById('techniques-grid');
+      grid.innerHTML = TECHNIQUES.map(t => `
+        <div class="bg-white rounded-2xl overflow-hidden card-shadow border border-slate-100 flex flex-col justify-between transition hover:-translate-y-0.5">
+          <div>
+            <div class="bg-gradient-to-r ${t.color} px-5 py-4 text-white flex items-center justify-between">
+              <span class="text-lg font-extrabold">${t.name}</span>
+              <span class="text-2xl bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center">${t.emoji}</span>
+            </div>
+            <div class="p-5 space-y-3">
+              <p class="text-sm font-medium text-slate-700 leading-relaxed">${t.desc}</p>
+              <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-1.5">
+                <div class="text-xs font-extrabold text-slate-500">대표 발명품 예시</div>
+                ${t.examples.map(ex => `<div class="text-xs sm:text-sm font-semibold text-slate-800">• ${ex}</div>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ====== 6. 활동1: 퀴즈 배틀 로직 ======
+    function renderQuiz() {
+      const qIdx = state.quiz.index;
+      if (qIdx >= QUIZ_QUESTIONS.length) {
+        document.getElementById('quiz-body').classList.add('hidden');
+        document.getElementById('quiz-result').classList.remove('hidden');
+        document.getElementById('quiz-final-total').textContent = QUIZ_QUESTIONS.length;
+        document.getElementById('quiz-final-correct').textContent = state.quiz.correct;
+        document.getElementById('quiz-final-maxcombo').textContent = state.quiz.maxCombo;
+        return;
+      }
+
+      document.getElementById('quiz-body').classList.remove('hidden');
+      document.getElementById('quiz-result').classList.add('hidden');
+      document.getElementById('quiz-feedback').classList.add('hidden');
+
+      const q = QUIZ_QUESTIONS[qIdx];
+      state.quiz.answered = false;
+
+      document.getElementById('quiz-progress').textContent = `문제 ${qIdx + 1} / ${QUIZ_QUESTIONS.length}`;
+      document.getElementById('quiz-combo').textContent = `🔥 ${state.quiz.combo} 연속 정답`;
+      document.getElementById('quiz-bar').style.width = `${((qIdx + 1) / QUIZ_QUESTIONS.length) * 100}%`;
+      document.getElementById('quiz-emoji').textContent = q.emoji;
+      document.getElementById('quiz-prompt').textContent = q.prompt;
+
+      const optionsEl = document.getElementById('quiz-options');
+      optionsEl.innerHTML = TECHNIQUES.map(t => `
+        <button type="button" data-answer="${t.name}" class="quiz-opt-btn p-3.5 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50 font-bold text-sm text-slate-800 transition flex items-center justify-center gap-2">
+          <span>${t.emoji}</span>
+          <span>${t.name}</span>
+        </button>
+      `).join('');
+
+      optionsEl.querySelectorAll('.quiz-opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleQuizAnswer(btn.dataset.answer, btn));
+      });
+    }
+
+    function handleQuizAnswer(selected, clickedBtn) {
+      if (state.quiz.answered) return;
+      state.quiz.answered = true;
+
+      const q = QUIZ_QUESTIONS[state.quiz.index];
+      const isCorrect = selected === q.answer;
+      const fb = document.getElementById('quiz-feedback');
+      const fbTitle = document.getElementById('quiz-feedback-title');
+      const fbDesc = document.getElementById('quiz-feedback-desc');
+
+      document.querySelectorAll('.quiz-opt-btn').forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.answer === q.answer) {
+          btn.classList.remove('border-slate-200', 'bg-white');
+          btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+        } else if (btn === clickedBtn && !isCorrect) {
+          btn.classList.remove('border-slate-200', 'bg-white');
+          btn.classList.add('border-rose-400', 'bg-rose-50', 'text-rose-800');
+        }
+      });
+
+      if (isCorrect) {
+        state.quiz.correct += 1;
+        state.quiz.combo += 1;
+        if (state.quiz.combo > state.quiz.maxCombo) state.quiz.maxCombo = state.quiz.combo;
+        const earned = 10 + (state.quiz.combo > 1 ? state.quiz.combo * 2 : 0);
+        addScore(earned);
+        playTone('correct');
+        fb.className = 'mt-5 rounded-2xl p-4 border border-emerald-200 bg-emerald-50 text-sm bounce-in';
+        fbTitle.textContent = `🎉 정답이에요! (+${earned}점)`;
+        fbTitle.className = 'font-extrabold text-base mb-1 text-emerald-800';
+      } else {
+        state.quiz.combo = 0;
+        playTone('wrong');
+        fb.className = 'mt-5 rounded-2xl p-4 border border-rose-200 bg-rose-50 text-sm bounce-in';
+        fbTitle.textContent = `😅 아쉬워요! 정답은 [${q.answer}]입니다.`;
+        fbTitle.className = 'font-extrabold text-base mb-1 text-rose-800';
+      }
+
+      document.getElementById('quiz-combo').textContent = `🔥 ${state.quiz.combo} 연속 정답`;
+      fbDesc.textContent = q.reason;
+      fb.classList.remove('hidden');
+    }
+
+    function resetQuiz() {
+      state.quiz = { index: 0, correct: 0, combo: 0, maxCombo: 0, answered: false };
+      renderQuiz();
+    }
+
+    // ====== 7. 활동2: 가위바위보 & 발명 룰렛 ======
+    const RPS_MAP = {
+      '가위': { emoji: '✌️', beats: '보' },
+      '바위': { emoji: '✊', beats: '가위' },
+      '보': { emoji: '🖐️', beats: '바위' }
+    };
+    const RPS_KEYS = ['가위', '바위', '보'];
+
+    function spinSlots() {
+      const itemEl = document.getElementById('slot-item-name');
+      const techEl = document.getElementById('slot-tech-name');
+      itemEl.parentElement.classList.add('roulette-spin');
+      techEl.parentElement.classList.add('roulette-spin');
+
+      let ticks = 0;
+      const spinTimer = setInterval(() => {
+        const randItem = CLASSROOM_ITEMS[Math.floor(Math.random() * CLASSROOM_ITEMS.length)];
+        const randTech = TECHNIQUES[Math.floor(Math.random() * TECHNIQUES.length)];
+        document.getElementById('slot-item-emoji').textContent = randItem.emoji;
+        itemEl.textContent = randItem.name;
+        document.getElementById('slot-tech-emoji').textContent = randTech.emoji;
+        techEl.textContent = randTech.name;
+        ticks++;
+        if (ticks >= 8) {
+          clearInterval(spinTimer);
+          state.roulette.item = randItem;
+          state.roulette.tech = randTech;
+          itemEl.parentElement.classList.remove('roulette-spin');
+          techEl.parentElement.classList.remove('roulette-spin');
+          document.getElementById('hint-box').classList.add('hidden');
+          playTone('pop');
+        }
+      }, 65);
+    }
+
+    function playRps(playerChoice) {
+      const aiChoice = RPS_KEYS[Math.floor(Math.random() * 3)];
+      document.getElementById('rps-player').textContent = RPS_MAP[playerChoice].emoji;
+      document.getElementById('rps-ai').textContent = RPS_MAP[aiChoice].emoji;
+
+      const statusEl = document.getElementById('rps-status');
+      if (playerChoice === aiChoice) {
+        statusEl.textContent = `비겼어요! 다시 한 번 가위바위보를 해보세요.`;
+        statusEl.className = 'text-center text-xs sm:text-sm font-bold text-slate-600 min-h-[20px] mt-1';
+        playTone('pop');
+      } else if (RPS_MAP[playerChoice].beats === aiChoice) {
+        statusEl.textContent = `🎉 이겼어요! 내 물건 쪽지와 발명 기법이 뽑혔어요! (+5점)`;
+        statusEl.className = 'text-center text-xs sm:text-sm font-bold text-emerald-700 min-h-[20px] mt-1';
+        addScore(5);
+        playTone('correct');
+        spinSlots();
+      } else {
+        statusEl.textContent = `앗, AI 친구가 이겼어요! 그래도 새로운 미션으로 도전해 볼까요?`;
+        statusEl.className = 'text-center text-xs sm:text-sm font-bold text-rose-600 min-h-[20px] mt-1';
+        playTone('wrong');
+        spinSlots();
+      }
+    }
+
+    // ====== 8. 활동3: 발명 아이디어 보드 & 1분 타이머 ======
+    function renderIdeas() {
+      document.getElementById('idea-count-badge').textContent = state.ideas.length;
+      const grid = document.getElementById('ideas-grid');
+      const filtered = state.boardFilter === '전체'
+        ? state.ideas
+        : state.ideas.filter(i => i.tech === state.boardFilter);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-10 text-center border border-dashed border-slate-300 text-slate-500 text-sm">
+            아직 등록된 발명품이 없어요. [활동2: 가위바위보 발명]에서 멋진 아이디어를 등록해 보세요!
+          </div>
+        `;
+        return;
+      }
+
+      const maxVotes = Math.max(...state.ideas.map(i => i.votes), 0);
+
+      grid.innerHTML = filtered.map(idea => {
+        const techObj = TECHNIQUES.find(t => t.name === idea.tech) || TECHNIQUES[0];
+        const isKing = maxVotes > 0 && idea.votes === maxVotes;
+        return `
+          <div class="bg-white rounded-2xl p-5 card-shadow border ${isKing ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-100'} flex flex-col justify-between gap-4 bounce-in">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${techObj.badge}">
+                  ${techObj.emoji} ${idea.tech}
+                </span>
+                ${isKing ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-black">👑 현재 발명왕</span>' : ''}
+              </div>
+              <div class="text-xs font-bold text-slate-400">재료 물건: ${idea.item} · 발명가: ${escapeHtml(idea.inventor)}</div>
+              <h4 class="text-lg font-extrabold text-slate-900 leading-snug">${escapeHtml(idea.title)}</h4>
+              <p class="text-sm text-slate-600 leading-relaxed">${escapeHtml(idea.desc)}</p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button type="button" data-vote-id="${idea.id}" class="vote-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${idea.voted ? 'bg-rose-500 text-white' : 'bg-rose-50 hover:bg-rose-100 text-rose-600'}">
+                <span>${idea.voted ? '❤️' : '🤍'}</span>
+                <span>추천 ${idea.votes}</span>
+              </button>
+              <button type="button" data-del-id="${idea.id}" class="del-idea-btn text-xs text-slate-400 hover:text-rose-600 font-semibold">
+                삭제
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.vote-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.voteId;
+          const target = state.ideas.find(i => i.id === id);
+          if (!target) return;
+          target.voted = !target.voted;
+          target.votes += target.voted ? 1 : -1;
+          if (target.voted) addScore(2);
+          playTone('pop');
+          saveState();
+          renderIdeas();
+        });
+      });
+
+      grid.querySelectorAll('.del-idea-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.delId;
+          state.ideas = state.ideas.filter(i => i.id !== id);
+          saveState();
+          renderIdeas();
+          showToast('아이디어를 삭제했어요.');
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function updateTimerDisplay() {
+      const m = String(Math.floor(state.timer.seconds / 60)).padStart(2, '0');
+      const s = String(state.timer.seconds % 60).padStart(2, '0');
+      document.getElementById('timer-display').textContent = `${m}:${s}`;
+    }
+
+    // ====== 9. 이벤트 바인딩 ======
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('total-score').textContent = state.score;
+      renderTechniques();
+      renderQuiz();
+      renderIdeas();
+
+      // 탭 이동
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+      document.getElementById('go-quiz-btn').addEventListener('click', () => switchTab('quiz'));
+      document.getElementById('quiz-to-activity2-btn').addEventListener('click', () => switchTab('roulette'));
+
+      // 효과음 토글
+      document.getElementById('sound-toggle').addEventListener('click', () => {
+        state.soundOn = !state.soundOn;
+        document.getElementById('sound-icon').textContent = state.soundOn ? '🔊' : '🔇';
+        document.getElementById('sound-label').textContent = state.soundOn ? '소리 켜짐' : '음소거';
+        if (state.soundOn) playTone('pop');
+      });
+
+      // 퀴즈 버튼
+      document.getElementById('quiz-next-btn').addEventListener('click', () => {
+        state.quiz.index += 1;
+        renderQuiz();
+      });
+      document.getElementById('quiz-restart-btn').addEventListener('click', resetQuiz);
+      document.getElementById('quiz-retry-btn').addEventListener('click', resetQuiz);
+
+      // 가위바위보 & 룰렛
+      document.querySelectorAll('.rps-btn').forEach(btn => {
+        btn.addEventListener('click', () => playRps(btn.dataset.rps));
+      });
+      document.getElementById('spin-direct-btn').addEventListener('click', spinSlots);
+
+      document.getElementById('hint-btn').addEventListener('click', () => {
+        const hintBox = document.getElementById('hint-box');
+        const item = state.roulette.item;
+        const tech = state.roulette.tech;
+        const hintText = (item.hints && item.hints[tech.name]) || `${item.name}에 ${tech.name}을 적용해 불편한 점을 고쳐 보세요!`;
+        hintBox.innerHTML = `<strong>💡 [${item.name} + ${tech.name}] 예시:</strong> ${hintText}`;
+        hintBox.classList.toggle('hidden');
+      });
+
+      // 발명품 등록
+      document.getElementById('idea-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inventor = document.getElementById('inventor-name').value.trim();
+        const title = document.getElementById('invention-title').value.trim();
+        const desc = document.getElementById('invention-desc').value.trim();
+        if (!inventor || !title || !desc) return;
+
+        state.ideas.unshift({
+          id: 'idea-' + Date.now(),
+          inventor,
+          item: state.roulette.item.name,
+          tech: state.roulette.tech.name,
+          title,
+          desc,
+          votes: 0,
+          voted: false
+        });
+        addScore(30);
+        playTone('correct');
+        saveState();
+        renderIdeas();
+
+        document.getElementById('invention-title').value = '';
+        document.getElementById('invention-desc').value = '';
+        showToast('🎉 발명 도감에 등록되었어요! (+30점)');
+        switchTab('board');
+      });
+
+      // 필터 칩
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          state.boardFilter = chip.dataset.filter;
+          document.querySelectorAll('.filter-chip').forEach(c => {
+            if (c === chip) {
+              c.className = 'filter-chip px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold';
+            } else {
+              c.className = 'filter-chip px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold';
+            }
+          });
+          renderIdeas();
+        });
+      });
+
+      document.getElementById('clear-ideas-btn').addEventListener('click', () => {
+        state.ideas = [...SAMPLE_IDEAS];
+        saveState();
+        renderIdeas();
+        showToast('기본 예시 아이디어만 남기고 초기화했어요.');
+      });
+
+      // 1분 발표 타이머
+      const toggleBtn = document.getElementById('timer-toggle-btn');
+      toggleBtn.addEventListener('click', () => {
+        if (state.timer.running) {
+          clearInterval(state.timer.intervalId);
+          state.timer.running = false;
+          toggleBtn.textContent = '시작';
+        } else {
+          if (state.timer.seconds <= 0) state.timer.seconds = 60;
+          state.timer.running = true;
+          toggleBtn.textContent = '일시정지';
+          state.timer.intervalId = setInterval(() => {
+            state.timer.seconds -= 1;
+            updateTimerDisplay();
+            if (state.timer.seconds <= 0) {
+              clearInterval(state.timer.intervalId);
+              state.timer.running = false;
+              toggleBtn.textContent = '시작';
+              playTone('alarm');
+              showToast('⏰ 1분 발표 시간이 종료되었어요!');
+            }
+          }, 1000);
+        }
+      });
+
+      document.getElementById('timer-reset-btn').addEventListener('click', () => {
+        clearInterval(state.timer.intervalId);
+        state.timer.running = false;
+        state.timer.seconds = 60;
+        toggleBtn.textContent = '시작';
+        updateTimerDisplay();
+      });
+    });
+  </script>
+</body>
+</html>
+
+```
+
+GitHub 저장소에 `index.html`로 저장한 뒤 **Settings → Pages**에서 브랜치를 선택하면 별도 서버나 빌드 과정 없이 바로 웹앱으로 실행됩니다.
